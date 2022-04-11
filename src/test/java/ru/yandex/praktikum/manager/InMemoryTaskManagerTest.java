@@ -5,16 +5,24 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
 import ru.yandex.praktikum.entity.Epic;
 import ru.yandex.praktikum.entity.SubTask;
 import ru.yandex.praktikum.entity.Task;
 import ru.yandex.praktikum.entity.Status;
+import ru.yandex.praktikum.utils.Managers;
 import static org.junit.jupiter.api.Assertions.*;
 
-class ManagerTest {
-    private Manager manager;
+@ExtendWith(MockitoExtension.class)
+class InMemoryTaskManagerTest {
+    @Mock
+    private HistoryManager historyManager;
+    private InMemoryTaskManager manager;
     private Epic epic;
     private Task task;
     private SubTask subTask;
@@ -24,7 +32,7 @@ class ManagerTest {
 
     @BeforeEach
     void createNewInstance() {
-        manager = new Manager();
+        manager = (InMemoryTaskManager) Managers.getDefault();
         epic = new Epic("First epic", "Clean the room", Status.NEW);
         task = new Task("First task", "Prepare food", Status.NEW);
         subTask = new SubTask("First subtask", "Wash the floors", Status.NEW, epic.getId());
@@ -38,7 +46,8 @@ class ManagerTest {
     @Test
     @DisplayName("Get current id")
     void getIdCurrent() {
-        long id = Manager.getIdCurrent();
+        epic = manager.addEpic(epic);
+        long id = epic.getId();
 
         assertNotNull(id);
     }
@@ -63,8 +72,8 @@ class ManagerTest {
         assertEquals(task, actual);
     }
 
-    @EnumSource(Status.class)
     @ParameterizedTest
+    @EnumSource(Status.class)
     @DisplayName("Create new instance subtask")
     void addSubTask(Status status) {
         epic = manager.addEpic(epic);
@@ -318,5 +327,15 @@ class ManagerTest {
         Map<Long, SubTask> actual = manager.getSubtasks();
 
         assertEquals(subtasks, actual);
+    }
+
+    @Test
+    @DisplayName("Get history call methods")
+    void getHistory() {
+        Mockito.when(historyManager.getHistory()).thenReturn(List.of(task));
+        manager.setHistoryManager(historyManager);
+        List<Task> actual = manager.getHistory();
+
+        assertEquals(List.of(task), actual);
     }
 }

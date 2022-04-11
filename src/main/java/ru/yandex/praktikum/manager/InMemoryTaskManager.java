@@ -1,47 +1,52 @@
 package ru.yandex.praktikum.manager;
 
+import java.util.*;
 import lombok.Getter;
 import lombok.Setter;
 import ru.yandex.praktikum.entity.Epic;
-import ru.yandex.praktikum.entity.SubTask;
 import ru.yandex.praktikum.entity.Task;
+import ru.yandex.praktikum.entity.SubTask;
 import ru.yandex.praktikum.entity.Status;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.*;
+import ru.yandex.praktikum.utils.Managers;
 import java.util.stream.Collectors;
+import java.util.concurrent.atomic.AtomicLong;
 
 @Setter
 @Getter
-public class Manager {
+public class InMemoryTaskManager implements TaskManager {
     private static final AtomicLong idCurrent = new AtomicLong();
+    private HistoryManager historyManager = Managers.getDefaultHistory();
     private Map<Long, Epic> epics;
     private Map<Long, Task> tasks;
     private Map<Long, SubTask> subtasks;
 
-    public Manager() {
+    public InMemoryTaskManager() {
         this.epics = new HashMap<>();
         this.tasks = new HashMap<>();
         this.subtasks = new HashMap<>();
     }
 
-    public static long getIdCurrent() {
+    private static long getIdCurrent() {
         return idCurrent.incrementAndGet();
     }
 
+    @Override
     public Epic addEpic(Epic epic) {
-        epic.setId(Manager.getIdCurrent());
+        epic.setId(InMemoryTaskManager.getIdCurrent());
         epics.put(epic.getId(), epic);
         return epic;
     }
 
+    @Override
     public Task addTask(Task task) {
-        task.setId(Manager.getIdCurrent());
+        task.setId(InMemoryTaskManager.getIdCurrent());
         tasks.put(task.getId(), task);
         return task;
     }
 
+    @Override
     public SubTask addSubTask(SubTask subTask) {
-        subTask.setId(Manager.getIdCurrent());
+        subTask.setId(InMemoryTaskManager.getIdCurrent());
         Epic epic = epics.get(subTask.getEpicId());
 
         if (epics.containsKey(epic.getId())) {
@@ -49,18 +54,20 @@ public class Manager {
             subTaskSet.add(subTask);
             subtasks.put(subTask.getId(), subTask);
         }
-        updateStatus(epic);
         updateEpic(epic);
         return subTask;
     }
 
+    @Override
     public Epic updateEpic(Epic epic) {
         if (epics.containsKey(epic.getId())) {
+            updateStatus(epic);
             epics.put(epic.getId(), epic);
         }
         return epic;
     }
 
+    @Override
     public Task updateTask(Task task) {
         if (tasks.containsKey(task.getId())) {
             tasks.put(task.getId(), task);
@@ -68,41 +75,53 @@ public class Manager {
         return task;
     }
 
+    @Override
     public SubTask updateSubTask(SubTask subTask) {
         Epic epic = epics.get(subTask.getEpicId());
 
         if (subtasks.containsKey(subTask.getId())) {
             subtasks.put(subTask.getId(), subTask);
         }
-        updateStatus(epic);
         updateEpic(epic);
         return subTask;
     }
 
+    @Override
     public Epic getEpicById(long id) {
-        return epics.get(id);
+        Epic epic = epics.get(id);
+        historyManager.addTask(epic);
+        return epic;
     }
 
+    @Override
     public Task getTaskById(long id) {
-        return tasks.get(id);
+        Task task = tasks.get(id);
+        historyManager.addTask(task);
+        return task;
     }
 
+    @Override
     public SubTask getSubTaskById(long id) {
-        return subtasks.get(id);
+        SubTask subTask = subtasks.get(id);
+        historyManager.addTask(subTask);
+        return subTask;
     }
 
+    @Override
     public void deleteEpicById(long id) {
         if (epics.containsKey(id)) {
             epics.remove(id);
         }
     }
 
+    @Override
     public void deleteTaskById(long id) {
         if (tasks.containsKey(id)) {
             tasks.remove(id);
         }
     }
 
+    @Override
     public void deleteSubTaskById(long id) {
         SubTask subTask = subtasks.get(id);
         Epic epic = epics.get(subTask.getEpicId());
@@ -113,22 +132,24 @@ public class Manager {
             epic.setSubTaskSet(subTaskSet);
             subtasks.remove(id);
         }
-        updateStatus(epic);
         updateEpic(epic);
     }
 
+    @Override
     public void deleteAllEpic() {
         if (!epics.isEmpty()) {
             epics.clear();
         }
     }
 
+    @Override
     public void deleteAllTask() {
         if (!tasks.isEmpty()) {
             tasks.clear();
         }
     }
 
+    @Override
     public void deleteAllSubTask(Epic epic) {
         Set<SubTask> subTaskSet = epic.getSubTaskSet();
 
@@ -136,35 +157,42 @@ public class Manager {
             subTaskSet.clear();
             subtasks.clear();
         }
-        updateStatus(epic);
         updateEpic(epic);
     }
 
+    @Override
     public List<Epic> getListAllEpic() {
         return new ArrayList<>(epics.values());
     }
 
+    @Override
     public List<Task> getListAllTask() {
         return new ArrayList<>(tasks.values());
     }
 
+    @Override
     public List<SubTask> getListAllSubTask() {
         return new ArrayList<>(subtasks.values());
     }
 
+    @Override
     public List<SubTask> getListAllSubTaskFromEpic(Epic epic) {
         return new ArrayList<>(epic.getSubTaskSet());
     }
 
+    @Override
+    public List<Task> getHistory() {
+        return historyManager.getHistory();
+    }
+
     private void updateStatus(Epic epic) {
         Set<SubTask> subTaskSet = epic.getSubTaskSet();
-        long countNew = subTaskSet.stream().filter(val -> val.getStatus().equals(Status.NEW)).count();
-        long countDone = subTaskSet.stream().filter(val -> val.getStatus().equals(Status.DONE)).count();
-        if (subTaskSet.isEmpty()) {
+        boolean isAllNew = subTaskSet.stream().allMatch(it -> it.getStatus() == Status.NEW);
+        boolean isAllDone = subTaskSet.stream().allMatch(it -> it.getStatus() == Status.DONE);
+
+        if (isAllNew) {
             epic.setStatus(Status.NEW);
-        } else if (countNew == subTaskSet.size()) {
-            epic.setStatus(Status.NEW);
-        } else if (countDone == subTaskSet.size()) {
+        } else if (isAllDone) {
             epic.setStatus(Status.DONE);
         } else {
             epic.setStatus(Status.IN_PROGRESS);
