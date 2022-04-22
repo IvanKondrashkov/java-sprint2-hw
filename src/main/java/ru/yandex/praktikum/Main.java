@@ -15,40 +15,59 @@ public class Main {
     private static Map<Long, SubTask> subtasks = manager.getSubtasks();
 
     public static void main(String[] args) {
-        Task task = new Task("#1", "First task", Status.NEW);
-        task = manager.addTask(task);
+        Task task1 = new Task("#1", "First task", Status.NEW);
+        task1 = manager.addTask(task1);
 
-        Epic epic = new Epic("#1", "First epic", Status.NEW);
-        epic = manager.addEpic(epic);
+        Task task2 = new Task("#2", "Second task", Status.NEW);
+        task2 = manager.addTask(task2);
 
-        SubTask subTask1 = new SubTask("#1", "First subtask!", Status.NEW, epic.getId());
+        Epic epic1 = new Epic("#1", "First epic", Status.NEW);
+        epic1 = manager.addEpic(epic1);
+
+        SubTask subTask1 = new SubTask("#1", "First subtask!", Status.NEW, epic1.getId());
         subTask1 = manager.addSubTask(subTask1);
 
-        SubTask subTask2 = new SubTask("#2", "Second subtask!", Status.NEW, epic.getId());
+        SubTask subTask2 = new SubTask("#2", "Second subtask!", Status.NEW, epic1.getId());
         subTask2 = manager.addSubTask(subTask2);
 
-        manager.getTaskById(task.getId());
+        SubTask subTask3 = new SubTask("#3", "Third subtask!", Status.NEW, epic1.getId());
+        subTask3 = manager.addSubTask(subTask3);
+
+        Epic epic2 = new Epic("#2", "Second epic", Status.NEW);
+        epic2 = manager.addEpic(epic2);
+
+        manager.getTaskById(task1.getId());
         manager.getSubTaskById(subTask1.getId());
         manager.getSubTaskById(subTask2.getId());
-        manager.getEpicById(epic.getId());
+        manager.getSubTaskById(subTask3.getId());
+        manager.getEpicById(epic1.getId());
 
-        task.setStatus(Status.IN_PROGRESS);
-        manager.getTaskById(task.getId());
+        task2.setStatus(Status.IN_PROGRESS);
+        manager.getTaskById(task2.getId());
         subTask1.setStatus(Status.IN_PROGRESS);
         manager.getSubTaskById(subTask1.getId());
         subTask2.setStatus(Status.IN_PROGRESS);
         manager.getSubTaskById(subTask2.getId());
-        manager.updateEpic(epic);
-        manager.getEpicById(epic.getId());
+        manager.updateEpic(epic1);
+        manager.getEpicById(epic1.getId());
+        manager.getEpicById(epic2.getId());
+        printHistory();
 
         subTask1.setStatus(Status.DONE);
         manager.getSubTaskById(subTask1.getId());
         subTask2.setStatus(Status.DONE);
         manager.getSubTaskById(subTask2.getId());
-        manager.getSubTaskById(task.getId());
-        manager.updateEpic(epic);
-        printTask();
+        subTask3.setStatus(Status.DONE);
+        manager.getSubTaskById(subTask3.getId());
+        manager.updateEpic(epic1);
+        manager.getEpicById(epic1.getId());
         printHistory();
+
+        manager.deleteTaskById(task1.getId());
+        manager.deleteEpicById(epic1.getId());
+        manager.deleteEpicById(epic2.getId());
+        printHistory();
+        printTask();
     }
 
     public static void printTask() {
