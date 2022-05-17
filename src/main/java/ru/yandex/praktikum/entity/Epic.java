@@ -2,17 +2,22 @@ package ru.yandex.praktikum.entity;
 
 import lombok.Setter;
 import lombok.Getter;
+import java.util.Set;
 import java.util.HashSet;
 import java.util.Objects;
-import java.util.Set;
 
 @Setter
 @Getter
 public class Epic extends Task {
     private Set<SubTask> subTaskSet;
 
-    public Epic(String name, String description, Status status) {
-        super(name, description, status);
+    public Epic(TypesTasks type, String name, String description, Status status) {
+        super(type, name, description, status);
+        this.subTaskSet = new HashSet<>();
+    }
+
+    public Epic(long id, TypesTasks type, String name, String description, Status status) {
+        super(id, type, name, description, status);
         this.subTaskSet = new HashSet<>();
     }
 
@@ -32,12 +37,6 @@ public class Epic extends Task {
 
     @Override
     public String toString() {
-        return "Epic{" +
-                "id=" + super.id +
-                ", name='" + super.name + '\'' +
-                ", description='" + super.description + '\'' +
-                ", status=" + super.status +
-                ", subTaskSet=" + subTaskSet +
-                '}';
+        return String.format("%d,%s,%s,%s,%s,", id, type, name, description, status);
     }
 }

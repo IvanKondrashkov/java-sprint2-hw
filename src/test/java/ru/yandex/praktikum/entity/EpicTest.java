@@ -8,14 +8,14 @@ import org.junit.jupiter.api.DisplayName;
 import static org.junit.jupiter.api.Assertions.*;
 
 class EpicTest {
-    private static final String MESSAGE_TO_STRING = "Epic{id=0, name='First epic', description='Clean the room', status=NEW, subTaskSet=[]}";
+    private static final String MESSAGE_TO_STRING = "0,EPIC,First epic,Clean the room,NEW,";
     private Epic epic;
     private SubTask subTask;
 
     @BeforeEach
     void createNewInstance() {
-        epic = new Epic("First epic", "Clean the room", Status.NEW);
-        subTask = new SubTask("First subtask", "Wash the floors", Status.NEW, epic.getId());
+        epic = new Epic(TypesTasks.EPIC, "First epic", "Clean the room", Status.NEW);
+        subTask = new SubTask(TypesTasks.SUBTASK, "First subtask", "Wash the floors", Status.NEW, epic.getId());
     }
 
     @Test
@@ -40,7 +40,7 @@ class EpicTest {
     @Test
     @DisplayName("Check epic equals")
     void epicEquals() {
-        Epic actual = new Epic("First epic", "Clean the room", Status.NEW);
+        Epic actual = new Epic(TypesTasks.EPIC, "First epic", "Clean the room", Status.NEW);
 
         assertEquals(epic, actual);
     }
@@ -48,7 +48,7 @@ class EpicTest {
     @Test
     @DisplayName("Check epic hashCode")
     void epicHashCode() {
-        Epic actual = new Epic("First epic", "Clean the room", Status.NEW);
+        Epic actual = new Epic(TypesTasks.EPIC, "First epic", "Clean the room", Status.NEW);
 
         assertEquals(epic.hashCode(), actual.hashCode());
     }

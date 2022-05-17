@@ -7,12 +7,12 @@ import org.junit.jupiter.api.DisplayName;
 import static org.junit.jupiter.api.Assertions.*;
 
 class TaskTest {
-    private static final String MESSAGE_TO_STRING = "Task{id=0, name='First task', description='Prepare food', status=NEW}";
+    private static final String MESSAGE_TO_STRING = "0,TASK,First task,Prepare food,NEW,";
     private Task task;
 
     @BeforeEach
     void createNewInstance() {
-        task = new Task("First task", "Prepare food", Status.NEW);
+        task = new Task(TypesTasks.TASK, "First task", "Prepare food", Status.NEW);
     }
 
     @Test
@@ -21,6 +21,14 @@ class TaskTest {
         long actual = task.getId();
 
         assertEquals(0, actual);
+    }
+
+    @Test
+    @DisplayName("Get task type from task instance")
+    void getType() {
+        TypesTasks actual = task.getType();
+
+        assertEquals(TypesTasks.TASK, actual);
     }
 
     @Test
@@ -58,6 +66,15 @@ class TaskTest {
     }
 
     @Test
+    @DisplayName("Set task type from task instance")
+    void setType() {
+        task.setType(null);
+        TypesTasks actual = task.getType();
+
+        assertNull(actual);
+    }
+
+    @Test
     @DisplayName("Set task name from task instance")
     void setName() {
         String name = "New name task";
@@ -90,7 +107,7 @@ class TaskTest {
     @Test
     @DisplayName("Check task equals")
     void taskEquals() {
-        Task actual = new Task("First task", "Prepare food", Status.NEW);
+        Task actual = new Task(TypesTasks.TASK, "First task", "Prepare food", Status.NEW);
 
         assertEquals(task, actual);
     }
@@ -98,7 +115,7 @@ class TaskTest {
     @Test
     @DisplayName("Check task hashCode")
     void taskHashCode() {
-        Task actual = new Task("First task", "Prepare food", Status.NEW);
+        Task actual = new Task(TypesTasks.TASK, "First task", "Prepare food", Status.NEW);
 
         assertEquals(task.hashCode(), actual.hashCode());
     }

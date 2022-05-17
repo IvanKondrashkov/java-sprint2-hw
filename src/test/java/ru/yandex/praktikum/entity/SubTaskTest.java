@@ -7,14 +7,14 @@ import org.junit.jupiter.api.DisplayName;
 import static org.junit.jupiter.api.Assertions.*;
 
 class SubTaskTest {
-    private static final String MESSAGE_TO_STRING = "SubTask{id=0, name='First subtask', description='Wash the floors', status=NEW, epicId=0}";
+    private static final String MESSAGE_TO_STRING = "0,SUBTASK,First subtask,Wash the floors,NEW,0";
     private Epic epic;
     private SubTask subTask;
 
     @BeforeEach
     void createNewInstance() {
-        epic = new Epic("First epic", "Clean the room", Status.NEW);
-        subTask = new SubTask("First subtask", "Wash the floors", Status.NEW, epic.getId());
+        epic = new Epic(TypesTasks.EPIC, "First epic", "Clean the room", Status.NEW);
+        subTask = new SubTask(TypesTasks.SUBTASK, "First subtask", "Wash the floors", Status.NEW, epic.getId());
     }
 
     @Test
@@ -38,7 +38,7 @@ class SubTaskTest {
     @Test
     @DisplayName("Check subtask equals")
     void subTaskEquals() {
-        SubTask actual = new SubTask("First subtask", "Wash the floors", Status.NEW, epic.getId());
+        SubTask actual = new SubTask(TypesTasks.SUBTASK, "First subtask", "Wash the floors", Status.NEW, epic.getId());
 
         assertEquals(subTask, actual);
     }
@@ -46,7 +46,7 @@ class SubTaskTest {
     @Test
     @DisplayName("Check subtask hashCode")
     void subTaskHashCode() {
-        SubTask actual = new SubTask("First subtask", "Wash the floors", Status.NEW, epic.getId());
+        SubTask actual = new SubTask(TypesTasks.SUBTASK, "First subtask", "Wash the floors", Status.NEW, epic.getId());
 
         assertEquals(subTask.hashCode(), actual.hashCode());
     }

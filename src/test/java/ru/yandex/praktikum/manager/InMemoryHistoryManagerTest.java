@@ -8,6 +8,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.Arguments;
 import ru.yandex.praktikum.entity.Task;
 import ru.yandex.praktikum.entity.Status;
+import ru.yandex.praktikum.entity.TypesTasks;
 import ru.yandex.praktikum.utils.Managers;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -31,7 +32,7 @@ class InMemoryHistoryManagerTest {
 
     static List<Task> fillListTasks(int size) {
         historyManager = Managers.getDefaultHistory();
-        Task task = new Task("First task", "Prepare food", Status.NEW);
+        Task task = new Task(TypesTasks.TASK, "First task", "Prepare food", Status.NEW);
 
         for (int i = 0; i < size; i++) {
             historyManager.addTask(task);

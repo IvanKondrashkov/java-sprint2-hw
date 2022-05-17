@@ -3,22 +3,22 @@ package ru.yandex.praktikum.manager;
 import java.util.*;
 import lombok.Getter;
 import lombok.Setter;
+import java.util.stream.Collectors;
 import ru.yandex.praktikum.entity.Epic;
 import ru.yandex.praktikum.entity.Task;
 import ru.yandex.praktikum.entity.SubTask;
 import ru.yandex.praktikum.entity.Status;
 import ru.yandex.praktikum.utils.Managers;
-import java.util.stream.Collectors;
 import java.util.concurrent.atomic.AtomicLong;
 
 @Setter
 @Getter
 public class InMemoryTaskManager implements TaskManager {
-    private static final AtomicLong idCurrent = new AtomicLong();
-    private HistoryManager historyManager = Managers.getDefaultHistory();
-    private Map<Long, Epic> epics;
-    private Map<Long, Task> tasks;
-    private Map<Long, SubTask> subtasks;
+    protected static AtomicLong idCurrent = new AtomicLong();
+    protected HistoryManager historyManager = Managers.getDefaultHistory();
+    protected Map<Long, Epic> epics;
+    protected Map<Long, Task> tasks;
+    protected Map<Long, SubTask> subtasks;
 
     public InMemoryTaskManager() {
         this.epics = new HashMap<>();
@@ -114,7 +114,11 @@ public class InMemoryTaskManager implements TaskManager {
 
         if (epics.containsKey(id)) {
             epics.remove(id);
-            subTaskSet.forEach(it -> historyManager.remove(it.getId()));
+            subTaskSet.forEach(it -> {
+                subtasks.remove(it.getId());
+                historyManager.remove(it.getId());
+            });
+
             historyManager.remove(id);
         }
     }

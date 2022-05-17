@@ -1,7 +1,9 @@
 package ru.yandex.praktikum.manager;
 
 import java.util.*;
-import org.mockito.Mock;
+import java.io.File;
+import java.nio.file.Files;
+import java.io.IOException;
 import org.mockito.Mockito;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.AfterEach;
@@ -12,14 +14,15 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.junit.jupiter.MockitoExtension;
 import ru.yandex.praktikum.entity.*;
+import ru.yandex.praktikum.exception.ManagerSaveException;
 import ru.yandex.praktikum.utils.Managers;
 import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(MockitoExtension.class)
-class InMemoryTaskManagerTest {
-    @Mock
+class FileBackedTasksManagerTest {
     private HistoryManager historyManager;
-    private InMemoryTaskManager manager;
+    private FileBackedTasksManager manager;
+    private File file;
     private Epic epic;
     private Task task;
     private SubTask subTask;
@@ -29,7 +32,9 @@ class InMemoryTaskManagerTest {
 
     @BeforeEach
     void createNewInstance() {
-        manager = (InMemoryTaskManager) Managers.getDefault();
+        file = new File("src/test/resources/test.csv");
+        manager = new FileBackedTasksManager(file);
+        historyManager = Managers.getDefaultHistory();
         epic = new Epic(TypesTasks.EPIC, "First epic", "Clean the room", Status.NEW);
         task = new Task(TypesTasks.TASK, "First task", "Prepare food", Status.NEW);
         subTask = new SubTask(TypesTasks.SUBTASK, "First subtask", "Wash the floors", Status.NEW, epic.getId());
@@ -37,16 +42,9 @@ class InMemoryTaskManagerTest {
 
     @AfterEach
     void clearStateManager() {
+        file.delete();
         manager = null;
-    }
-
-    @Test
-    @DisplayName("Get current id")
-    void getIdCurrent() {
-        epic = manager.addEpic(epic);
-        long id = epic.getId();
-
-        assertNotNull(id);
+        historyManager = null;
     }
 
     @Test
@@ -113,8 +111,7 @@ class InMemoryTaskManagerTest {
         epic = manager.addEpic(epic);
         subtasks = manager.getSubtasks();
         subtasks.put(subTask.getId(), subTask);
-        subTask = new SubTask(TypesTasks.SUBTASK, "Second subtask", "Read from 1 to 20 pages", Status.NEW,
-                epic.getId());
+        subTask = new SubTask(TypesTasks.SUBTASK, "Second subtask", "Read from 1 to 20 pages", Status.NEW, epic.getId());
         subTask = manager.updateSubTask(subTask);
         SubTask actual = subtasks.get(subTask.getId());
 
@@ -221,119 +218,84 @@ class InMemoryTaskManagerTest {
     }
 
     @Test
-    @DisplayName("Get list all epic")
-    void getListAllEpic() {
-        epic = manager.addEpic(epic);
-        List<Epic> actual = manager.getListAllEpic();
-
-        assertEquals(List.of(epic), actual);
-    }
-
-    @Test
-    @DisplayName("Get list all task")
-    void getListAllTask() {
-        task = manager.addTask(task);
-        List<Task> actual = manager.getListAllTask();
-
-        assertEquals(List.of(task), actual);
-    }
-
-    @Test
-    @DisplayName("Get list all subtask")
-    void getListAllSubTask() {
-        epic = manager.addEpic(epic);
-        subTask.setEpicId(epic.getId());
-        subTask = manager.addSubTask(subTask);
-        List<SubTask> actual = manager.getListAllSubTask();
-
-        assertEquals(List.of(subTask), actual);
-    }
-
-    @Test
-    @DisplayName("Get list all subtask from epic")
-    void getListAllSubTaskFromEpic() {
-        epic = manager.addEpic(epic);
-        subTask.setEpicId(epic.getId());
-        subTask = manager.addSubTask(subTask);
-        Set<SubTask> subTaskSet = epic.getSubTaskSet();
-        subTaskSet.add(subTask);
-        List<SubTask> actual = manager.getListAllSubTaskFromEpic(epic);
-
-        assertEquals(List.of(subTask), actual);
-    }
-
-    @Test
-    @DisplayName("Get epic hashmap")
-    void getEpicMap() {
-        epics = manager.getEpics();
-        int actual = epics.size();
-
-        assertEquals(0, actual);
-    }
-
-    @Test
-    @DisplayName("Get task hashmap")
-    void getTaskMap() {
-        tasks = manager.getTasks();
-        int actual = tasks.size();
-
-        assertEquals(0, actual);
-    }
-
-    @Test
-    @DisplayName("Get subtask hashmap")
-    void getSubTaskMap() {
-        subtasks = manager.getSubtasks();
-        int actual = subtasks.size();
-
-        assertEquals(0, actual);
-    }
-
-    @Test
-    @DisplayName("Set epic hashmap")
-    void setEpicMap() {
-        epics = manager.getEpics();
-        epic = manager.addEpic(epic);
-        epics.put(epic.getId(), epic);
-        manager.setEpics(epics);
-        Map<Long, Epic> actual = manager.getEpics();
-
-        assertEquals(epics, actual);
-    }
-
-    @Test
-    @DisplayName("Set task hashmap")
-    void setTaskMap() {
-        tasks = manager.getTasks();
-        task = manager.addTask(task);
-        tasks.put(task.getId(), task);
-        manager.setTasks(tasks);
-        Map<Long, Task> actual = manager.getTasks();
-
-        assertEquals(tasks, actual);
-    }
-
-    @Test
-    @DisplayName("Set subtask hashmap")
-    void setSubTaskMap() {
-        subtasks = manager.getSubtasks();
-        epic = manager.addEpic(epic);
-        subTask.setEpicId(epic.getId());
-        subTask = manager.addSubTask(subTask);
-        subtasks.put(subTask.getId(), subTask);
-        manager.setSubtasks(subtasks);
-        Map<Long, SubTask> actual = manager.getSubtasks();
-
-        assertEquals(subtasks, actual);
-    }
-
-    @Test
     @DisplayName("Get history call methods")
     void getHistory() {
+        historyManager = Mockito.mock(InMemoryHistoryManager.class);
         Mockito.when(historyManager.getHistory()).thenReturn(List.of(task));
         manager.setHistoryManager(historyManager);
         List<Task> actual = manager.getHistory();
 
         assertEquals(List.of(task), actual);
+    }
+
+    @Test
+    @DisplayName("Get file by manager")
+    void getFile() {
+        File actual = manager.getFile();
+
+        assertEquals(file, actual);
+    }
+
+    @Test
+    @DisplayName("Save tasks in file test.csv")
+    void save() throws IOException {
+        manager.addEpic(epic);
+        manager.addTask(task);
+        manager.getEpicById(epic.getId());
+        manager.getTaskById(task.getId());
+        List<String> csv = Files.readAllLines(file.toPath());
+
+        assertTrue(csv.get(1).contains(TypesTasks.TASK.name()));
+        assertTrue(csv.get(2).contains(TypesTasks.EPIC.name()));
+        assertNotNull(csv.get(4));
+    }
+
+    @Test
+    @DisplayName("Load tasks in file test.csv")
+    void load() throws IOException {
+        manager.addEpic(epic);
+        manager.addTask(task);
+        manager.getEpicById(epic.getId());
+        manager.getTaskById(task.getId());
+        manager = new FileBackedTasksManager(file);
+        FileBackedTasksManager.loadFromFile(file);
+        List<String> csv = Files.readAllLines(file.toPath());
+
+        assertTrue(csv.get(1).contains(TypesTasks.TASK.name()));
+        assertTrue(csv.get(2).contains(TypesTasks.EPIC.name()));
+        assertNotNull(csv.get(4));
+
+    }
+
+    @Test
+    @DisplayName("Checking for throwing an exception when saving to a file test.csv")
+    void checkExceptionFromSave() {
+        Exception exception = assertThrows(ManagerSaveException.class, () -> {
+            file = new File("/");
+            file.setReadOnly();
+            manager = new FileBackedTasksManager(file);
+            manager.addTask(task);
+        });
+
+        String message = "Saving to a file ended incorrectly!";
+        String actual = exception.getMessage();
+
+        assertEquals(message, actual);
+    }
+
+    @Test
+    @DisplayName("Checking for throwing an exception when loading from a file test.csv")
+    void checkExceptionFromLoad() {
+        Exception exception = assertThrows(ManagerSaveException.class, () -> {
+            file = new File("/");
+            file.setReadable(false, false);
+            manager = new FileBackedTasksManager(file);
+            FileBackedTasksManager.loadFromFile(file);
+        });
+
+        String message = "The download from the file ended incorrectly!";
+        String actual = exception.getMessage();
+
+        assertEquals(message, actual);
     }
 }

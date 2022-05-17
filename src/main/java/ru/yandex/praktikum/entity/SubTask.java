@@ -9,8 +9,13 @@ import java.util.Objects;
 public class SubTask extends Task {
     private long epicId;
 
-    public SubTask(String name, String description, Status status, long epicId) {
-        super(name, description, status);
+    public SubTask(TypesTasks type, String name, String description, Status status, long epicId) {
+        super(type, name, description, status);
+        this.epicId = epicId;
+    }
+
+    public SubTask(long id, TypesTasks type, String name, String description, Status status, long epicId) {
+        super(id, type, name, description, status);
         this.epicId = epicId;
     }
 
@@ -30,12 +35,6 @@ public class SubTask extends Task {
 
     @Override
     public String toString() {
-        return "SubTask{" +
-                "id=" + super.id +
-                ", name='" + super.name + '\'' +
-                ", description='" + super.description + '\'' +
-                ", status=" + super.status +
-                ", epicId=" + epicId +
-                '}';
+        return String.format("%d,%s,%s,%s,%s,%d", id, type, name, description, status, epicId);
     }
 }
