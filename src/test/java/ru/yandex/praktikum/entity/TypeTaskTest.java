@@ -6,11 +6,11 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import static org.junit.jupiter.api.Assertions.*;
 
-class TypesTasksTest {
+class TypeTaskTest {
     @ParameterizedTest
     @EnumSource(names = {"EPIC","TASK","SUBTASK"})
     @DisplayName("Checking enumeration instances")
-    void enumSourceFromTypesTasks(TypesTasks type) {
-        assertTrue(EnumSet.of(TypesTasks.EPIC, TypesTasks.TASK, TypesTasks.SUBTASK).contains(type));
+    void enumSourceFromTypesTasks(TypeTask type) {
+        assertTrue(EnumSet.of(TypeTask.EPIC, TypeTask.TASK, TypeTask.SUBTASK).contains(type));
     }
 }

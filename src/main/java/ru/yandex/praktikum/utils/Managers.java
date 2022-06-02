@@ -4,13 +4,11 @@ import java.io.File;
 import ru.yandex.praktikum.manager.*;
 
 public class Managers {
-    private static final File file = new File("src/main/resources/data.csv");
-
     public static TaskManager getDefault() {
         return new InMemoryTaskManager();
     }
 
-    public static TaskManager getFileBackedTasksManager() {
+    public static TaskManager getFileBackedTasksManager(File file) {
         return new FileBackedTasksManager(file);
     }
 

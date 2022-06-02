@@ -1,5 +1,6 @@
 package ru.yandex.praktikum.manager;
 
+import java.util.Map;
 import java.util.List;
 import ru.yandex.praktikum.entity.Epic;
 import ru.yandex.praktikum.entity.SubTask;
@@ -36,6 +37,18 @@ public interface TaskManager {
 
     void deleteAllSubTask(Epic epic);
 
+    Map<Long, Epic> getEpics();
+
+    Map<Long, Task> getTasks();
+
+    Map<Long, SubTask> getSubtasks();
+
+    void setEpics(Map<Long, Epic> epics);
+
+    void setTasks(Map<Long, Task> tasks);
+
+    void setSubtasks(Map<Long, SubTask> subtasks);
+
     List<Epic> getListAllEpic();
 
     List<Task> getListAllTask();
@@ -45,4 +58,6 @@ public interface TaskManager {
     List<SubTask> getListAllSubTaskFromEpic(Epic epic);
 
     List<Task> getHistory();
+
+    List<Task> getPrioritizedTasks();
 }

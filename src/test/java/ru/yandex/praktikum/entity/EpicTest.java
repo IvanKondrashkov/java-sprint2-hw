@@ -1,5 +1,6 @@
 package ru.yandex.praktikum.entity;
 
+import java.time.LocalDateTime;
 import java.util.Set;
 import java.util.HashSet;
 import org.junit.jupiter.api.Test;
@@ -8,14 +9,14 @@ import org.junit.jupiter.api.DisplayName;
 import static org.junit.jupiter.api.Assertions.*;
 
 class EpicTest {
-    private static final String MESSAGE_TO_STRING = "0,EPIC,First epic,Clean the room,NEW,";
     private Epic epic;
     private SubTask subTask;
+    private final LocalDateTime startTime = LocalDateTime.now();
 
     @BeforeEach
-    void createNewInstance() {
-        epic = new Epic(TypesTasks.EPIC, "First epic", "Clean the room", Status.NEW);
-        subTask = new SubTask(TypesTasks.SUBTASK, "First subtask", "Wash the floors", Status.NEW, epic.getId());
+    void init() {
+        epic = new Epic(TypeTask.EPIC, "First epic", "Clean the room", Status.NEW, 0, startTime);
+        subTask = new SubTask(TypeTask.SUBTASK, "First subtask", "Wash the floors", Status.NEW, 30, startTime, epic.getId());
     }
 
     @Test
@@ -40,7 +41,7 @@ class EpicTest {
     @Test
     @DisplayName("Check epic equals")
     void epicEquals() {
-        Epic actual = new Epic(TypesTasks.EPIC, "First epic", "Clean the room", Status.NEW);
+        Epic actual = new Epic(TypeTask.EPIC, "First epic", "Clean the room", Status.NEW, 0, startTime);
 
         assertEquals(epic, actual);
     }
@@ -48,7 +49,7 @@ class EpicTest {
     @Test
     @DisplayName("Check epic hashCode")
     void epicHashCode() {
-        Epic actual = new Epic(TypesTasks.EPIC, "First epic", "Clean the room", Status.NEW);
+        Epic actual = new Epic(TypeTask.EPIC, "First epic", "Clean the room", Status.NEW, 0, startTime);
 
         assertEquals(epic.hashCode(), actual.hashCode());
     }
@@ -56,8 +57,9 @@ class EpicTest {
     @Test
     @DisplayName("Check epic toString")
     void epicToString() {
+        final String message = "0,EPIC,First epic,Clean the room,NEW,0," + startTime + "," + startTime.plusMinutes(epic.getDuration()) + ",";
         String actual = epic.toString();
 
-        assertEquals(MESSAGE_TO_STRING, actual);
+        assertEquals(message, actual);
     }
 }

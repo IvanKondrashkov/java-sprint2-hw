@@ -3,6 +3,7 @@ package ru.yandex.praktikum.manager;
 import lombok.Getter;
 import java.io.*;
 import java.util.*;
+import java.time.LocalDateTime;
 import ru.yandex.praktikum.entity.*;
 import ru.yandex.praktikum.utils.CsvFormatterByHistory;
 import ru.yandex.praktikum.exception.ManagerSaveException;
@@ -123,7 +124,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
 
     private Task fromString(String value) {
         final String[] fields = value.split(",");
-        final TypesTasks type = TypesTasks.valueOf(fields[1]);
+        final TypeTask type = TypeTask.valueOf(fields[1]);
         switch (type) {
             case EPIC: {
                 return new Epic(
@@ -131,7 +132,9 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
                         type,
                         fields[2],
                         fields[3],
-                        Status.valueOf(fields[4])
+                        Status.valueOf(fields[4]),
+                        Integer.parseInt(fields[5]),
+                        LocalDateTime.parse(fields[6])
                 );
             }
             case TASK: {
@@ -140,7 +143,9 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
                         type,
                         fields[2],
                         fields[3],
-                        Status.valueOf(fields[4])
+                        Status.valueOf(fields[4]),
+                        Integer.parseInt(fields[5]),
+                        fields[6].equals("null") ? null : LocalDateTime.parse(fields[6])
                 );
             }
             case SUBTASK: {
@@ -150,7 +155,9 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
                         fields[2],
                         fields[3],
                         Status.valueOf(fields[4]),
-                        Long.parseLong(fields[5])
+                        Integer.parseInt(fields[5]),
+                        fields[6].equals("null") ? null : LocalDateTime.parse(fields[6]),
+                        Long.parseLong(fields[8])
                 );
             }
             default: {
@@ -161,7 +168,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
 
     private void save() {
         try (final BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
-            String header = "id,type,name,status,description,epic";
+            String header = "id,type,name,status,description,duration,start,end,epic";
             writer.append(header);
             writer.newLine();
             for (Map.Entry<Long, Task> entry : tasks.entrySet()) {
@@ -183,7 +190,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
             writer.newLine();
             writer.append(history);
         } catch (IOException e) {
-            throw new ManagerSaveException("Saving to a file ended incorrectly!");
+            throw new ManagerSaveException("Saving to a file ended incorrectly!", e);
         }
     }
 
@@ -194,13 +201,13 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
                 String line = reader.readLine();
                 if (!line.isEmpty()) {
                     Task task = fromString(line);
-                    if (task.getType() == TypesTasks.EPIC) {
+                    if (task.getType() == TypeTask.EPIC) {
                         epics.put(task.getId(), (Epic) task);
                     }
-                    if (task.getType() == TypesTasks.TASK) {
+                    if (task.getType() == TypeTask.TASK) {
                         tasks.put(task.getId(), task);
                     }
-                    if (task.getType() == TypesTasks.SUBTASK) {
+                    if (task.getType() == TypeTask.SUBTASK) {
                         subtasks.put(task.getId(), (SubTask) task);
                     }
                 } else {
@@ -227,7 +234,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
                 }
             }
         } catch (IOException e) {
-            throw new ManagerSaveException("The download from the file ended incorrectly!");
+            throw new ManagerSaveException("The download from the file ended incorrectly!", e);
         }
     }
 

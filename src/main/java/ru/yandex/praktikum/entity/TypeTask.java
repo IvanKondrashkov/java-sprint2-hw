@@ -1,6 +1,6 @@
 package ru.yandex.praktikum.entity;
 
-public enum TypesTasks {
+public enum TypeTask {
     EPIC,
     TASK,
     SUBTASK
