@@ -10,7 +10,7 @@ import ru.yandex.praktikum.exception.ManagerSaveException;
 
 @Getter
 public class FileBackedTasksManager extends InMemoryTaskManager {
-    private final File file;
+    private File file;
 
     public FileBackedTasksManager(File file) {
         this.file = file;
@@ -166,7 +166,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         }
     }
 
-    private void save() {
+    protected void save() {
         try (final BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
             String header = "id,type,name,status,description,duration,start,end,epic";
             writer.append(header);
@@ -194,7 +194,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         }
     }
 
-    private void load() {
+    protected void load() {
         try (final BufferedReader reader = new BufferedReader(new FileReader(file))) {
             reader.readLine();
             while (true) {

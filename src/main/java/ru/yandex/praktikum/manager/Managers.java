@@ -1,11 +1,12 @@
-package ru.yandex.praktikum.utils;
+package ru.yandex.praktikum.manager;
 
 import java.io.File;
-import ru.yandex.praktikum.manager.*;
+import ru.yandex.praktikum.http.KVClient;
+import ru.yandex.praktikum.http.KVServer;
 
 public class Managers {
     public static TaskManager getDefault() {
-        return new InMemoryTaskManager();
+        return new HTTPTaskManager(new KVClient(KVServer.PORT));
     }
 
     public static TaskManager getFileBackedTasksManager(File file) {

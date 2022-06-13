@@ -18,6 +18,8 @@
         <jacoco-maven-plugin.version>0.8.7</jacoco-maven-plugin.version>
         <junit-jupiter-api.version>5.8.1</junit-jupiter-api.version>
         <junit-jupiter-params.version>5.8.1</junit-jupiter-params.version>
+        <org.apache.httpcomponents.version>4.4.11</org.apache.httpcomponents.version>
+        <com.google.code.gson.version>2.9.0</com.google.code.gson.version>
         <mockito.version>2.23.0</mockito.version>
         <lombok.version>1.18.22</lombok.version>
     </properties>
@@ -42,10 +44,20 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpcore</artifactId>
+            <version>${org.apache.httpcomponents.version}</version>
+        </dependency>
+        <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <version>${lombok.version}</version>
             <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <version>${com.google.code.gson.version}</version>
         </dependency>
     </dependencies>
 

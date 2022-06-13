@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 @Getter
 @EqualsAndHashCode
 public class Epic extends Task {
-    private Set<SubTask> subTaskSet;
+    private transient Set<SubTask> subTaskSet;
 
     public Epic(TypeTask type, String name, String description, Status status, int duration, LocalDateTime startTime) {
         super(type, name, description, status, duration, startTime);
